@@ -1,0 +1,48 @@
+version: '3.2'
+
+services:
+  jenkins:
+    build:
+      context: jenkins/
+    ports:
+      - 8090:8080
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      - /usr/local/bin/docker:/usr/local/bin/docker  
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - backend
+
+  sonarqube:
+    image: sonarqube:latest
+    entrypoint:
+      - ./bin/run.sh
+      - -Dsonar.log.level=INFO
+    ports:
+      - 9000:9000
+      - 9092:9092
+    networks:
+      - backend
+
+  nexus:
+    image: sonatype/nexus3:3.12.1
+    volumes:
+      - nexus_data:/nexus-data
+    ports:
+      - 8091:8081
+    networks:
+      - backend
+
+  udcs:
+    image: ibmcom/ucds:6.2.7.1.960481
+    ports:
+      - 8443:8443
+      - 7918:7918
+    
+networks:
+  backend:
+    driver: bridge
+
+volumes: 
+  jenkins_data:
+  nexus_data:
